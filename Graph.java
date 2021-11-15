@@ -1,3 +1,4 @@
+import java.rmi.activation.ActivationGroup_Stub;
 import java.util.ArrayList;
 
 public class Graph {
@@ -136,11 +137,11 @@ public class Graph {
     }
 
     /* !! The Partition and Sort Methods were found at https://www.geeksforgeeks.org/java-program-for-quicksort/ !!
-     * They have been slightly modified to accomidate my program*/
+     * They have been slightly modified to accomdate my program*/
     private int partition(ArrayList<double[]> arr, int low, int high, int a_sortByIndex)
     {
         double pivot = arr.get(high)[a_sortByIndex]; 
-        int i = (low-1); // index of smaller element
+        int i = (low - 1); // index of smaller element
         for (int j = low; j < high; j++)
         {
             // If current element is smaller than or
@@ -150,16 +151,55 @@ public class Graph {
                 i++;
   
                 // swap arr[i] and arr[j]
-                double temp = arr.get(i)[a_sortByIndex];
-                arr.get(i)[a_sortByIndex] = arr.get(j)[a_sortByIndex];
-                arr.get(j)[a_sortByIndex] = temp;
+                switch(a_sortByIndex) {
+                    case 0: //case of 'x'
+                        double tempX = arr.get(i)[a_sortByIndex];
+                        double tempY = arr.get(i)[a_sortByIndex + 1];
+
+                        arr.get(i)[a_sortByIndex] = arr.get(j)[a_sortByIndex];
+                        arr.get(i)[a_sortByIndex + 1] = arr.get(j)[a_sortByIndex + 1];
+                        
+                        arr.get(j)[a_sortByIndex] = tempX;
+                        arr.get(j)[a_sortByIndex + 1] = tempY;
+
+                        if(arr.get(i).length > 2) {
+                            double tempZ = arr.get(i)[a_sortByIndex + 2];
+                            arr.get(i)[a_sortByIndex + 2] = arr.get(j)[a_sortByIndex + 2];
+                            arr.get(j)[a_sortByIndex + 2] = tempZ;
+                        }
+                    break;
+                    case 1: //case of 'y'
+                    break;
+                    case 2: //case of 'z'
+                    break;
+                }
             }
         }
   
         // swap arr[i+1] and arr[high] (or pivot)
-        double temp = arr.get(i+1)[a_sortByIndex];
-        arr.get(i+1)[a_sortByIndex] = arr.get(high)[a_sortByIndex];
-        arr.get(high)[a_sortByIndex] = temp;
+        switch(a_sortByIndex) {
+            case 0: //case of 'x'
+                double tempX = arr.get(i + 1)[a_sortByIndex];
+                double tempY = arr.get(i + 1)[a_sortByIndex + 1];
+
+                arr.get(i + 1)[a_sortByIndex] = arr.get(high)[a_sortByIndex];
+                arr.get(i + 1)[a_sortByIndex + 1] = arr.get(high)[a_sortByIndex + 1];
+
+                arr.get(high)[a_sortByIndex] = tempX;
+                arr.get(high)[a_sortByIndex + 1] = tempY;
+
+                //in case our graph is a_3DGraph
+                if(arr.get(i + 1).length > 2) {
+                    double tempZ = arr.get(i + 1)[a_sortByIndex + 2];
+                    arr.get(i + 1)[a_sortByIndex + 2] = arr.get(high)[a_sortByIndex + 2];
+                    arr.get(high)[a_sortByIndex + 2] = tempZ;
+                }
+            break;
+            case 1: //case of 'y'
+            break;
+            case 2: //case of 'z'
+            break;
+        }
   
         return i+1;
     }
@@ -184,8 +224,17 @@ public class Graph {
         double l_minDistance = Double.MAX_VALUE;
 
         for(int i = 0; i < this.twoDGraph.size(); i++) {
-            for(int j = 0; j < this.twoDGraph.size(); i++) {
+            for(int j = 0; j < this.twoDGraph.size(); j++) {
                 //compare minDistance to the distance between 2 points
+                if(i != j) {
+                    double x = this.twoDGraph.get(j)[0] - this.twoDGraph.get(i)[0]; //x2 - x1
+                    double y = this.twoDGraph.get(i)[1] - this.twoDGraph.get(j)[1]; //y1 - y2
+
+                    double l_distanceBetweenPoints = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+
+                    if(l_minDistance > l_distanceBetweenPoints) l_minDistance = l_distanceBetweenPoints;
+                }
+                
             }
         }
 
