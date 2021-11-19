@@ -1,4 +1,3 @@
-import java.rmi.activation.ActivationGroup_Stub;
 import java.util.ArrayList;
 
 public class Graph {
@@ -149,12 +148,14 @@ public class Graph {
             if (arr.get(j)[a_sortByIndex] <= pivot)
             {
                 i++;
+                double tempX = 0.0;
+                double tempY = 0.0;
   
                 // swap arr[i] and arr[j]
                 switch(a_sortByIndex) {
                     case 0: //case of 'x'
-                        double tempX = arr.get(i)[a_sortByIndex];
-                        double tempY = arr.get(i)[a_sortByIndex + 1];
+                        tempX = arr.get(i)[a_sortByIndex];
+                        tempY = arr.get(i)[a_sortByIndex + 1];
 
                         arr.get(i)[a_sortByIndex] = arr.get(j)[a_sortByIndex];
                         arr.get(i)[a_sortByIndex + 1] = arr.get(j)[a_sortByIndex + 1];
@@ -169,6 +170,20 @@ public class Graph {
                         }
                     break;
                     case 1: //case of 'y'
+                        tempX = arr.get(i)[a_sortByIndex - 1];
+                        tempY = arr.get(i)[a_sortByIndex];
+
+                        arr.get(i)[a_sortByIndex - 1] = arr.get(j)[a_sortByIndex - 1];
+                        arr.get(i)[a_sortByIndex] = arr.get(j)[a_sortByIndex];
+
+                        arr.get(j)[a_sortByIndex - 1] = tempX;
+                        arr.get(j)[a_sortByIndex] = tempY;
+
+                        if(arr.get(i).length > 2) {
+                            double tempZ = arr.get(i)[a_sortByIndex + 1];
+                            arr.get(i)[a_sortByIndex + 1] = arr.get(j)[a_sortByIndex + 1];
+                            arr.get(j)[a_sortByIndex + 1] = tempZ;
+                        }
                     break;
                     case 2: //case of 'z'
                     break;
@@ -177,10 +192,12 @@ public class Graph {
         }
   
         // swap arr[i+1] and arr[high] (or pivot)
+        double tempX = 0.0;
+        double tempY = 0.0;
         switch(a_sortByIndex) {
             case 0: //case of 'x'
-                double tempX = arr.get(i + 1)[a_sortByIndex];
-                double tempY = arr.get(i + 1)[a_sortByIndex + 1];
+                tempX = arr.get(i + 1)[a_sortByIndex];
+                tempY = arr.get(i + 1)[a_sortByIndex + 1];
 
                 arr.get(i + 1)[a_sortByIndex] = arr.get(high)[a_sortByIndex];
                 arr.get(i + 1)[a_sortByIndex + 1] = arr.get(high)[a_sortByIndex + 1];
@@ -196,6 +213,21 @@ public class Graph {
                 }
             break;
             case 1: //case of 'y'
+                tempX = arr.get(i + 1)[a_sortByIndex - 1];
+                tempY = arr.get(i + 1)[a_sortByIndex];
+
+                arr.get(i + 1)[a_sortByIndex - 1] = arr.get(high)[a_sortByIndex - 1];
+                arr.get(i + 1)[a_sortByIndex] = arr.get(high)[a_sortByIndex];
+
+                arr.get(high)[a_sortByIndex - 1] = tempX;
+                arr.get(high)[a_sortByIndex] = tempY;
+
+                //in the case our graph is a 3DGraph
+                if(arr.get(i + 1).length > 2) {
+                    double tempZ = arr.get(i + 1)[a_sortByIndex + 1];
+                    arr.get(i + 1)[a_sortByIndex + 1] = arr.get(high)[a_sortByIndex + 1];
+                    arr.get(high)[a_sortByIndex + 1] = tempZ;
+                }
             break;
             case 2: //case of 'z'
             break;
@@ -233,22 +265,80 @@ public class Graph {
                     double l_distanceBetweenPoints = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 
                     if(l_minDistance > l_distanceBetweenPoints) l_minDistance = l_distanceBetweenPoints;
-                }
-                
+                }  
             }
         }
 
         return l_minDistance;
     }
 
-    public double minDistance_ySort() {
-        double l_minDistance = Double.MAX_VALUE;
-
-        return l_minDistance;
+    //"under"loaded function because java doesn't support default args (boo!)
+    public double minDistance() {
+        return minDistance_ySort(this.twoDGraph);
     }
 
-    public double minDistance_merge() {
+    public double minDistance_ySort(ArrayList<double[]> a_graph) {
         double l_minDistance = Double.MAX_VALUE;
+
+        //base case
+        if(a_graph.size() == 2) {
+            return Math.sqrt( //distance between points
+                Math.pow(a_graph.get(0)[0] - a_graph.get(1)[0], 2) + //x2 - x1 
+                Math.pow(a_graph.get(1)[1] - a_graph.get(0)[1], 2)   //y1 - y2
+            );
+        }
+
+        //split the graph in half
+        ArrayList<double[]> l_graph_1stHalf = new ArrayList<>();
+        ArrayList<double[]> l_graph_2ndHalf = new ArrayList<>();
+
+        for(int i = 0; i < a_graph.size() / 2; i++) {
+            l_graph_1stHalf.add(a_graph.get(i));
+            l_graph_2ndHalf.add(a_graph.get(a_graph.size() / 2 + i));            
+        }
+
+        //recursively find the min distance on each side of the graph
+        l_minDistance = Math.min(
+            minDistance_ySort(l_graph_1stHalf),
+            minDistance_ySort(l_graph_2ndHalf)
+        );
+
+        //solution construction step
+        ArrayList<double[]> closePts = new ArrayList<>();
+        for(int i = 0; i < a_graph.size(); i++) {
+            if( a_graph.get(i)[0] > l_graph_1stHalf.get(l_graph_1stHalf.size() - 1)[0] - l_minDistance &&
+                a_graph.get(i)[0] < l_graph_1stHalf.get(l_graph_1stHalf.size() - 1)[0] + l_minDistance) {
+
+                closePts.add(a_graph.get(i));
+            }
+        }
+
+        //sort by y
+        sort(closePts, 0, closePts.size() - 1, 1);
+
+        for(int i = 0; i < a_graph.size(); i++) { //loop through each point
+            int secondLoopDist = 0;
+            if(closePts.size() >= 7) {
+                secondLoopDist = 7;
+            } else {
+                secondLoopDist = closePts.size();
+            }
+            for(int j = 0; j < secondLoopDist; j++) { //loop through the next 6 points according to Y
+                if(a_graph.get(i)[0] != closePts.get(j)[0]       //make sure the x's and y's don't match up ( will always result in a distance of 0 )
+                   && a_graph.get(i)[1] != closePts.get(j)[1]) {
+
+                    double x = a_graph.get(i)[0] - closePts.get(j)[0]; //x2 - x1
+                    double y = a_graph.get(i)[1] - closePts.get(j)[1]; //y1 - y2
+
+                    double l_distanceBetweenPoints = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+
+                    if(l_distanceBetweenPoints < l_minDistance) { //update minDistance
+                        l_minDistance = l_distanceBetweenPoints;
+                    }
+                }
+                
+            }
+        }
 
         return l_minDistance;
     }

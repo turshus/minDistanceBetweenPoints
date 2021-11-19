@@ -38,9 +38,12 @@ public class MinDistance {
                     simpleGraph.set2DGraph(simpleCoordinates);
 
                     //tell the user
-                    System.out.println("Graph:\n");
+                    System.out.println("Graph Before Sort:");
                     for(int i = 0; i < simpleGraph.get2DGraph().size(); i++) {
-                        System.out.printf("%d: { %f, %f }\n", i, simpleGraph.get2DGraph().get(i)[0], simpleGraph.get2DGraph().get(i)[1]);
+                        System.out.printf("%d: { %f, %f }\n", 
+                        i, 
+                        simpleGraph.get2DGraph().get(i)[0],     
+                        simpleGraph.get2DGraph().get(i)[1]);
                     }
 
                     //double for loop method to find the two closest points
@@ -50,13 +53,47 @@ public class MinDistance {
                     for(int i = 0; i < simpleGraph.get2DGraph().size(); i++) {
                         System.out.printf("%d: { %f, %f }\n", i, simpleGraph.get2DGraph().get(i)[0], simpleGraph.get2DGraph().get(i)[1]);
                     }
-                    System.out.printf("Double for loop closest points: %f", simpleGraph.minDistance_loops());
-                    System.out.printf("Y Sort Method to find closest points: %f", simpleGraph.minDistance_ySort());
-                    System.out.printf("Merg Sort Method to find closest points: %f", simpleGraph.minDistance_merge());
-
+                    System.out.printf("Double for loop closest points: %f\n", simpleGraph.minDistance_loops());
+                    System.out.printf("Y Sort Method to find closest points: %f\n", simpleGraph.minDistance());
                 break;
                 case "e":
-                    break;
+                    System.out.println("\nStarting the timing study\n");
+
+                    long timingTotTime = System.currentTimeMillis();
+                    int index = 2;
+                    while(true) {
+                        int n = (int)Math.pow(2, index);
+
+                        System.out.printf("\nRound: %d\nn: %d\n", index - 1, n);
+
+                        //generate the graph
+                        Graph graph = new Graph(n, true);
+
+                        //For loop 
+                        long forLoopTimeStart = System.currentTimeMillis();
+                        System.out.printf("Double for loop closest points: %f\n", graph.minDistance_loops());
+                        long forLoopTime = System.currentTimeMillis() - forLoopTimeStart;
+
+                        //y sort
+                        long ySortTimeStart = System.currentTimeMillis();
+                        graph.sort2DGraph('x');
+                        System.out.printf("Y Sort Method to find closest points: %f\n", graph.minDistance());
+                        long ySortTime = System.currentTimeMillis() - ySortTimeStart;
+
+                        //output the results
+                        System.out.printf("  TOTAL time this round: %d ms\n  For Loop Time: %d ms\n  y-sort time: %d ms\n",
+                            System.currentTimeMillis() - forLoopTimeStart,
+                            forLoopTime,
+                            ySortTime
+                        );
+                        index++;
+
+                        if(System.currentTimeMillis() - forLoopTimeStart > 3600000 || System.currentTimeMillis() - ySortTimeStart > 3600000) { //if either one takes longer than an hour to run, cut it
+                            System.out.println("\n\nTiming Study Concluded\nTotal Time: " + ((System.currentTimeMillis() - timingTotTime) / 1000 / 60) + " min\n");
+                            break;
+                        }
+                    }
+                break;
                 case "q":
                     System.out.println("\nThanks!");
                     keepRunning = false;
