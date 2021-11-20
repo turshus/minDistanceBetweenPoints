@@ -10,7 +10,7 @@ public class MinDistance {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         boolean keepRunning = true;
         while(keepRunning) {
-            System.out.println("(S)imple Case  |  (E)mpirical Study  |  (Q)uit");
+            System.out.println("(S)imple Case  |  (E)mpirical Study  |  (H)ybrid  |  (Q)uit");
             System.out.print("Your choice: ");
             String usrChoice = reader.readLine().toLowerCase();
 
@@ -88,7 +88,7 @@ public class MinDistance {
                         );
                         index++;
 
-                        if(System.currentTimeMillis() - forLoopTimeStart > 3600000 || System.currentTimeMillis() - ySortTimeStart > 3600000) { //if either one takes longer than an hour to run, cut it
+                        if(System.currentTimeMillis() - forLoopTimeStart > 7200000 || System.currentTimeMillis() - ySortTimeStart > 7200000) { //if either one takes longer than an hour to run, cut it
                             System.out.println("\n\nTiming Study Concluded\nTotal Time: " + ((System.currentTimeMillis() - timingTotTime) / 1000 / 60) + " min\n");
                             break;
                         }
@@ -97,6 +97,36 @@ public class MinDistance {
                 case "q":
                     System.out.println("\nThanks!");
                     keepRunning = false;
+                break;
+                case "h":
+                    System.out.println("\nStarting hybrid algorithm");
+
+                    long hybridStartTime = System.currentTimeMillis();
+                    int hybridIndex = 2;
+
+                    while(true) {
+                        int n = (int)Math.pow(2, hybridIndex);
+
+                        Graph hybridGraph = new Graph(n, true);
+
+                        System.out.printf("Round: %d\nn: %d\n", hybridIndex - 1, n);
+
+                        long start = System.currentTimeMillis();
+                        if(n < 2000) { //use the simple algorithm
+                            System.out.printf("Closest Points: %f", hybridGraph.minDistance_loops());
+                        } else { //use the complex algorithm
+                            System.out.printf("Closest Points: %f", hybridGraph.minDistance());
+                        }
+                        long end = System.currentTimeMillis() - start;
+
+                        System.out.printf("\nTime: %d ms\n\n", end);
+
+                        if(end > 3500000) {
+                            break;
+                        } else {
+                            hybridIndex++;
+                        }
+                    }
                 break;
                 default:
                     System.out.println("\nInvalid Input.  Enter a 's', 'e', or 'q'...\n");
